@@ -9,24 +9,15 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
     },
 
     postCreate: function postCreate() {
-      // the config object is passed in
-      // this.setConfig(this.config);
       this._setListLayers(this.NodeUrlDepa, this.NodeFieldLabelDepa, this.NodeFieldValueDepa);
       this._setListLayers(this.NodeUrlProv, this.NodeFieldLabelProv, this.NodeFieldValueProv);
       this._setListLayers(this.NodeUrlDist, this.NodeFieldLabelDist, this.NodeFieldValueDist);
-      // this._setListLayers(this.textNodeUrlProv);
-      // this._setListLayers(this.textNodeUrlDist);
-
-      // this.textNodeUrlDepa.on('change', function(evt) {
-      //     console.log(evt);
-      // });
     },
     setConfig: function setConfig(config) {
-      // console.log(this.textNodeUrlDepa);
       this.config = config;
       this.NodeUrlDepa.setValue(config.departamento.id);
       this.NodeFieldLabelDepa.setValue(config.departamento.label);
-      this.NodeFieldLabelDepa.setValue(config.departamento.label);
+      this.NodeFieldValueDepa.setValue(config.departamento.value);
 
       this.NodeUrlProv.setValue(config.provincia.id);
       this.NodeFieldLabelProv.setValue(config.provincia.label);
@@ -35,20 +26,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
       this.NodeUrlDist.setValue(config.distrito.id);
       this.NodeFieldLabelDist.setValue(config.distrito.label);
       this.NodeFieldValueDist.setValue(config.distrito.value);
-
-      // this._setListLayers(this.textNodeUrlDepa);
-      // this.textNodeFieldLabelDepa.set("value", config.departamento.label);
-      // this.textNodeFieldValueDepa.set("value", config.departamento.value);
-
-      // this.textNodeUrlProv.set("value", config.provincia.url);
-      // this._setListLayers(this.textNodeUrlProv);
-      // this.textNodeFieldLabelProv.set("value", config.provincia.label);
-      // this.textNodeFieldValueProv.set("value", config.provincia.value);
-
-      // this.textNodeUrlDist.set("value", config.distrito.url);
-      // this._setListLayers(this.textNodeUrlDist);
-      // this.textNodeFieldLabelDist.set("value", config.distrito.label);
-      // this.textNodeFieldValueDist.set("value", config.distrito.value);
     },
     getConfig: function getConfig() {
       // this._setListLayers();

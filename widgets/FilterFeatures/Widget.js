@@ -28,12 +28,14 @@ export default declare([
   startup() {
     this.inherited(arguments);
     console.log('FilterFeatures::startup');
-    console.log(this.config);
-    urlService = this.config.departamento.url;
-    clause = '1=1';
-    valueField = this.config.departamento.value;
-    labelField = this.config.departamento.label;
-    attachPoint = this.depaSelectAttachPoint;
+    console.log(this.map);
+    var feature = this.map.getLayer(this.config.departamento.id)
+    
+    var urlService = feature.url;
+    var clause = '1=1';
+    var valueField = this.config.departamento.value;
+    var labelField = this.config.departamento.label;
+    var attachPoint = this.depaSelectAttachPoint;
     this._filterFeature(urlService, clause, valueField, labelField, attachPoint);
 
   },
