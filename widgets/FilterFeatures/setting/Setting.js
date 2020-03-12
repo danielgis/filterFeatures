@@ -8,93 +8,153 @@ import LayerInfos from 'jimu/LayerInfos/LayerInfos';
 import array from 'dojo/_base/array';
 import dom from "dojo/dom";
 import on from "dojo/on";
+import esriRequest from "esri/request";
+import html from "dojo/html";
+import CheckBox from "dijit/form/CheckBox";
 
 export default declare([
-  BaseWidgetSetting,
-  _WidgetsInTemplateMixin,
-  QueryTask,
-  Query,
-  ], {
+    BaseWidgetSetting,
+    _WidgetsInTemplateMixin,
+    QueryTask,
+    Query,
+], {
 
-  baseClass: 'filter-features-setting',
+    baseClass: 'filter-features-setting',
 
 
-  startup: function() {
-    this.inherited(arguments);
-    this.setConfig(this.config);
-  },
+    startup: function() {
+        this.inherited(arguments);
+        this.setConfig(this.config);
+    },
 
-  postCreate () {
-    this._setListLayers(this.NodeUrlDepa, this.NodeFieldLabelDepa, this.NodeFieldValueDepa);
-    this._setListLayers(this.NodeUrlProv, this.NodeFieldLabelProv, this.NodeFieldValueProv);
-    this._setListLayers(this.NodeUrlDist, this.NodeFieldLabelDist, this.NodeFieldValueDist);
+    postCreate() {
+        this._setListLayers(this.NodeUrlDepa, this.NodeFieldLabelDepa, this.NodeFieldValueDepa);
+        this._setListLayers(this.NodeUrlProv, this.NodeFieldLabelProv, this.NodeFieldValueProv);
+        this._setListLayers(this.NodeUrlDist, this.NodeFieldLabelDist, this.NodeFieldValueDist);
 
-  },
+        // this._gridxLayers();
 
-  setConfig (config) {
-    this.config = config;
-    this.NodeUrlDepa.setValue(config.departamento.id);
-    this.NodeFieldLabelDepa.setValue(config.departamento.label);
-    this.NodeFieldValueDepa.setValue(config.departamento.value);
+    },
 
-    this.NodeUrlProv.setValue(config.provincia.id);
-    this.NodeFieldLabelProv.setValue(config.provincia.label);
-    this.NodeFieldValueProv.setValue(config.provincia.value);
+    setConfig(config) {
+        this.config = config;
+        this.NodeUrlDepa.setValue(config.departamento.id);
+        this.NodeFieldLabelDepa.setValue(config.departamento.label);
+        this.NodeFieldValueDepa.setValue(config.departamento.value);
 
-    this.NodeUrlDist.setValue(config.distrito.id);
-    this.NodeFieldLabelDist.setValue(config.distrito.label);
-    this.NodeFieldValueDist.setValue(config.distrito.value);
-  },
+        this.NodeUrlProv.setValue(config.provincia.id);
+        this.NodeFieldLabelProv.setValue(config.provincia.label);
+        this.NodeFieldValueProv.setValue(config.provincia.value);
 
-  getConfig () {
-    // this._setListLayers();
-    // WAB will get config object through this method
-    return {
-      departamento: {
-        'id': this.NodeUrlDepa.value,
-        'label': this.NodeFieldLabelDepa.value,
-        'value': this.NodeFieldValueDepa.value
-      },
-      provincia: {
-        'id': this.NodeUrlProv.value,
-        'label': this.NodeFieldLabelProv.value,
-        'value': this.NodeFieldValueProv.value
-      },
-      distrito: {
-        'id': this.NodeUrlDist.value,
-        'label': this.NodeFieldLabelDist.value,
-        'value': this.NodeFieldValueDist.value
-      }
-    };
-  },
+        this.NodeUrlDist.setValue(config.distrito.id);
+        this.NodeFieldLabelDist.setValue(config.distrito.label);
+        this.NodeFieldValueDist.setValue(config.distrito.value);
+    },
 
-  _setListLayers(dojonodeService, dojonodeAlias, dojonodeValue){
-    LayerInfos.getInstance(this.map, this.map.itemInfo)
-    .then(lang.hitch(this, function(layerInfosObj) {
-      var infos = layerInfosObj.getLayerInfoArray();
-      var options = [];
-      for (var i in infos){
-        options.push({
-          label: infos[i].title,
-          value: infos[i].id,
-        })
-      };
-      dojonodeService.options = options;
-
-      dojonodeService.on('change', function(evt){
-        var selectedLayer = layerInfosObj.getLayerInfoById(evt);
-        var fields = selectedLayer.layerObject.fields;
-        var optionFields = []
-        for (var i in fields){
-          optionFields.push({
-            label: fields[i].alias,
-            value: fields[i].name,
-          })
+    getConfig() {
+        return {
+            departamento: {
+                'url': this.NodeUrlDepa.value,
+                'label': this.NodeFieldLabelDepa.value,
+                'value': this.NodeFieldValueDepa.value
+            },
+            provincia: {
+                'url': this.NodeUrlProv.value,
+                'label': this.NodeFieldLabelProv.value,
+                'value': this.NodeFieldValueProv.value
+            },
+            distrito: {
+                'url': this.NodeUrlDist.value,
+                'label': this.NodeFieldLabelDist.value,
+                'value': this.NodeFieldValueDist.value
+            }
         };
-        dojonodeAlias.set('options', optionFields);
-        dojonodeValue.set('options', optionFields);
-      })
-    }));
-  },
+    },
 
-});
+    _setListLayers(dojonodeService, dojonodeAlias, dojonodeValue) {
+        LayerInfos.getInstance(this.map, this.map.itemInfo)
+            .then(lang.hitch(this, function(layerInfosObj) {
+                var infos = layerInfosObj.getLayerInfoArray();
+                var layerInfosObjClone = layerInfosObj;
+                var options = [];
+                for (var i in infos) {
+                    var arrayLayers = infos[i].getSubLayers();
+                    if (arrayLayers.length > 0) {
+                        var arrayoptions = this._listSubLayerdOfRootLayer(arrayLayers);
+                        options.push.apply(options, arrayoptions.optSubLayers);
+                        layerInfosObjClone._layerInfos = layerInfosObjClone._layerInfos.concat(arrayoptions.infoSubLayers);
+                    } else {
+                        options.push({
+                            label: infos[i].title,
+                            value: infos[i].layerObject.url,
+                        })
+                    }
+                };
+                dojonodeService.options = options;
+
+                dojonodeService.on('change', function(evt) {
+                    // var selectedLayer = layerInfosObjClone.getLayerInfoById(evt);
+
+                    // var url = selectedLayer.layerObject.url;
+                    esriRequest({url: evt + "?f=json"}).then(function(response) {
+                        var fields = response.fields;
+                        var optionFields = []
+                        fields.forEach(function(field) {
+                            optionFields.push({
+                                label: field.alias,
+                                value: field.name,
+                            })
+                        })
+                        dojonodeAlias.set('options', optionFields);
+                        dojonodeValue.set('options', optionFields);
+                    });
+                })
+            }));
+    },
+
+    _listSubLayerdOfRootLayer(arrayLayers) {
+        var optionsSublayers = [];
+        var infosSublayers = [];
+        recursiveSubLayers(arrayLayers);
+
+        function recursiveSubLayers(arrayLayers) {
+            for (var i in arrayLayers) {
+                var sublayers = arrayLayers[i].getSubLayers();
+                if (sublayers.length > 0) {
+                    recursiveSubLayers(sublayers)
+                } else {
+                    optionsSublayers.push({
+                        label: arrayLayers[i].title,
+                        value: arrayLayers[i].layerObject.url
+                    });
+                    infosSublayers.push(arrayLayers[i]);
+                }
+            }
+        };
+        return {
+            optSubLayers: optionsSublayers,
+            infoSubLayers: infosSublayers
+        }
+    },
+
+    // _gridxLayers(){
+      // var listLayers = this.NodeUrlDepa.options;
+     // var elm = document.getElementById("containerListFeatures");
+       // var template;
+      // for (var i in listLayers){
+        // option = listLayers[i]
+        // var tmp = `
+          // <div>
+            // <div></div>
+            // <div>${option.label}</div>
+            // <div><select data-dojo-type='dijit/form/Select'></select></div>
+          // </div><br>
+        // `
+        // template = template + tmp;
+      // }
+      // html.set(this.containerListFeatures.domNode, template);
+    // }
+
+
+
+})

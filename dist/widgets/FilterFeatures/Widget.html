@@ -1,13 +1,13 @@
 <div>
 	<div class="container">
 		<p>Departamento</p>
-		<select  name="depaselect" class="selectFilter" data-dojo-type='dijit/form/Select' data-dojo-attach-point="depaSelectAttachPoint">
+		<select  name="depaselect" class="selectFilter" data-dojo-type='dijit/form/Select' data-dojo-attach-point="depaSelectAttachPoint" data-dojo-attach-event="onChange: _filterFeatureDepa">
 		</select><br>
 		<p>Provincia</p>
-		<select  name="provselect" class="selectFilter" data-dojo-type="dijit/form/Select">
+		<select  name="provselect" class="selectFilter" data-dojo-type="dijit/form/Select" data-dojo-attach-point="provSelectAttachPoint" data-dojo-attach-event="onChange: _filterFeatureProv">
 		</select><br>
 		<p>Distrito</p>
-		<select  name="distselect" class="selectFilter" data-dojo-type="dijit/form/Select">
+		<select  name="distselect" class="selectFilter" data-dojo-type="dijit/form/Select" data-dojo-attach-point="distSelectAttachPoint" data-dojo-attach-event="onChange: _filterFeatureDist">
 		</select>
 		<br><br>
 		<button data-dojo-type="dijit/form/Button" class="buttonFilter">Filtrar</button>

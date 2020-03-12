@@ -3,8 +3,8 @@ import BaseWidget from 'jimu/BaseWidget';
 import _WidgetsInTemplateMixin from 'dijit/_WidgetsInTemplateMixin';
 import Query from "esri/tasks/query";
 import QueryTask from "esri/tasks/QueryTask";
-// import "dojo/parser";
-// import "dijit/form/Select";
+import dom from "dojo/dom";
+import on from "dojo/on";
 
 // To create a widget, you need to derive from BaseWidget.
 export default declare([
@@ -23,30 +23,67 @@ export default declare([
   postCreate () {
     this.inherited(arguments);
     console.log('FilterFeatures::postCreate');
+    self = this;
+
+    // this._urlDepa;
+    // this._fieldCodDepa;
+    // this._fieldNomDepa;
+    // this._urlProv;
+    // this._fieldCodProv;
+    // this._fieldNomPrv;
+    // this._urlDist;
+    // this._fieldCodDist;
+    // this._fieldNomDist;
   },
   
   startup() {
     this.inherited(arguments);
-    console.log('FilterFeatures::startup');
-    console.log(this.map);
-    var feature = this.map.getLayer(this.config.departamento.id)
-    
-    var urlService = feature.url;
-    var clause = '1=1';
-    var valueField = this.config.departamento.value;
-    var labelField = this.config.departamento.label;
-    var attachPoint = this.depaSelectAttachPoint;
-    this._filterFeature(urlService, clause, valueField, labelField, attachPoint);
+    _urlDepa = this.config.departamento.url;
+    _fieldCodDepa = this.config.departamento.value;
+    _fieldNomDepa = this.config.departamento.label;
+    clause = "1=1"
 
+    _urlProv = this.config.provincia.url;
+    _fieldCodProv = this.config.provincia.value;
+    _fieldNomProv = this.config.provincia.label;
+    _urlDist = this.config.distrito.url;
+    _fieldCodDist = this.config.distrito.value;
+    _fieldNomDist = this.config.distrito.label;
+
+    this._turnOffAllLayers();
+
+    this._filterFeature(_urlDepa, clause, _fieldCodDepa, _fieldNomDepa, self.depaSelectAttachPoint);
   },
 
-  _filterFeature(urlService, clause, valueField, labelField, attachPoint){
+  _filterFeatureDepa(evt){
+    var clause = `${_fieldCodProv} like '${evt}%'`
+
+    this._zoomExtendSelected(_urlDepa, _fieldCodDepa, evt);
+    this._filterFeature(_urlProv, clause, _fieldCodProv, _fieldNomProv, self.provSelectAttachPoint);
+  },
+
+  _filterFeatureProv(evt){
+    var clause = `${_fieldCodDist} like '${evt}%'`
+
+    this._zoomExtendSelected(_urlProv, _fieldCodProv, evt);
+    this._filterFeature(_urlDist, clause, _fieldCodDist, _fieldNomDist, self.distSelectAttachPoint);
+  },
+
+  _filterFeatureDist(evt){
+    var urlServiceDist = this.config.distrito.url;
+    var valueFieldDist = this.config.distrito.value;
+    var value = evt;
+
+    this._zoomExtendSelected(urlServiceDist, valueFieldDist, evt);
+  },
+
+  _filterFeature(urlService, clause, valueField, labelField, dojonodeAlias){
+    var options = []
     var queryTask = new QueryTask(urlService);
     var query = new Query();
     query.where = clause;
     query.outFields = [valueField, labelField];
     queryTask.execute(query, function(results){
-      var options = []
       for(var i in results.features){
         var opt = {
           'label': results.features[i].attributes[labelField],
@@ -54,9 +91,30 @@ export default declare([
         };
         options.push(opt);
       }
-      attachPoint.options = options;
+      dojonodeAlias.set('options', options);
     });
   },
+
+  _zoomExtendSelected(urlService, field, value){
+    var queryTask = new QueryTask(urlService);
+    var clause = `${field}='${value}'`;
+    var query = new Query();
+    query.where = clause;
+    query.returnGeometry = true;
+    queryTask.executeForExtent(query, function(results){
+      var extent = results.extent;
+      self.map.setExtent(extent, true);
+    });
+  },
+
+  _turnOffAllLayers(){
+    var layerIds = this.map.graphicsLayerIds;
+    var feature;
+    for (var i in layerIds){
+      feature = this.map.getLayer(layerIds[i]);
+      feature.hide();
+    }
+  }
   // onOpen() {
   //   console.log('FilterFeatures::onOpen');
   // },
