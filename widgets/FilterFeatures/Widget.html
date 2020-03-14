@@ -10,6 +10,11 @@
 		<select  name="distselect" class="selectFilter" data-dojo-type="dijit/form/Select" data-dojo-attach-point="distSelectAttachPoint" data-dojo-attach-event="onChange: _filterFeatureDist">
 		</select>
 		<br><br>
-		<button data-dojo-type="dijit/form/Button" class="buttonFilter">Filtrar</button>
+		<div id="containerButtonsff">
+			<button data-dojo-attach-point="buttonFiltrarff" class="clsbuttonFiltrarff" data-dojo-type="dijit/form/Button" data-dojo-attach-event="onClick: _filterFeatures">Filtrar</button>
+			<button data-dojo-attach-point="buttonNuevoFiltroff" class="clsbuttonNuevoFiltroff" data-dojo-type="dijit/form/Button" data-dojo-attach-event="onClick: _newFilter">Nuevo filtro</button>
+			<button data-dojo-attach-point="buttonAgregarFiltroff" class="clsbuttonAgregarFiltroff" data-dojo-type="dijit/form/Button" data-dojo-attach-event="onClick: _addFilter">Agregar filtro</button>
+		</div>
+		<div class="loaderff"></div>
 	</div>
 </div>
